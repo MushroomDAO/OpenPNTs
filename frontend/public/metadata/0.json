@@ -1,0 +1,15 @@
+{
+  "name": "Alice's Coffee Points",
+  "description": "Loyalty points for Alice's Coffee Co. customers! Redeem for discounts and free coffee.",
+  "image": "https://ipfs.io/ipfs/QmVz123abcDEF456ghiJKL789mnoPQR012stuV/alice_coffee_logo.png",
+  "attributes": [
+    {
+      "trait_type": "Business Type",
+      "value": "Coffee Shop"
+    },
+    {
+      "trait_type": "Location",
+      "value": "Downtown"
+    }
+  ]
+}
