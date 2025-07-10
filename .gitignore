@@ -1,2 +1,17 @@
-# Local environment variables
 .env.local
+# Foundry build artifacts
+broadcast
+out/
+cache/
+broadcast/
+
+# Node.js / pnpm
+node_modules/
+pnpm-lock.yaml
+
+# IDE and OS generated files
+.DS_Store
+.env
+.vscode/
+*.log
+*.tmp

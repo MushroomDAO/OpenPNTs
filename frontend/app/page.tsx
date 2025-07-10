@@ -1,13 +1,36 @@
 'use client';
 
 import Link from 'next/link';
-import { useAccount, useConnect, useDisconnect } from 'wagmi';
-import { injected } from '@wagmi/connectors';
+import { useAccount, useConnect, useDisconnect, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
+import { injected } from '@wagmi/connectors'; // Original import
+import { OpenPNTsABI } from '../lib/contracts/abis';
+import { OPEN_PNTS_ADDRESS } from '../lib/constants';
 
 export default function Home() {
   const { address, isConnected } = useAccount();
   const { connect } = useConnect();
   const { disconnect } = useDisconnect();
+
+  // For platform owner to create initial PNT (Token ID 0 for Alice)
+  const { writeContract: writeCreatePNT, data: createPNTHash } = useWriteContract();
+  const { isLoading: isCreatingPNT, isSuccess: isPNTCreated } = useWaitForTransactionReceipt({
+    hash: createPNTHash,
+  });
+
+  const handleCreateInitialPNT = () => {
+    if (!isConnected || !address) {
+      alert('Please connect your wallet first.');
+      return;
+    }
+    // This assumes the connected wallet is the platform owner
+    // and creates a PNT for Alice (Token ID 0)
+    writeCreatePNT({
+      address: OPEN_PNTS_ADDRESS,
+      abi: OpenPNTsABI,
+      functionName: 'create',
+      args: [address, BigInt(1_000_000_000)], // Mint 1 billion points to the platform owner
+    });
+  };
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-24">
@@ -31,6 +54,18 @@ export default function Home() {
           >
             Disconnect
           </button>
+
+          {/* Temporary button for platform owner to create initial PNT */}
+          <button
+            className="px-6 py-3 bg-orange-600 text-white rounded-lg shadow-md hover:bg-orange-700 transition-colors mb-4"
+            onClick={handleCreateInitialPNT}
+            disabled={isCreatingPNT || isPNTCreated}
+          >
+            {isCreatingPNT ? 'Creating PNT...' : isPNTCreated ? 'PNT Created!' : 'Create Initial PNT (Platform Owner)'}
+          </button>
+          {createPNTHash && <p className="mt-2 text-sm text-gray-600">PNT Creation Tx: <a href={`https://sepolia.etherscan.io/tx/${createPNTHash}`} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">{createPNTHash}</a></p>}
+
+
           <Link href="/create">
             <button className="px-6 py-3 bg-green-600 text-white rounded-lg shadow-md hover:bg-green-700 transition-colors mb-4">
               Create Digital Points Card

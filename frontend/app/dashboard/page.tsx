@@ -1,90 +1,28 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
+import { useAccount, useReadContract, useReadContracts, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { formatUnits } from 'viem';
-import { SaleFactoryABI, SaleABI, OpenPNTsABI, MockERC20ABI } from '../../lib/contracts/abis';
-import { SALE_FACTORY_ADDRESS, OPEN_PNTS_ADDRESS } from '../../lib/constants';
+import { SaleFactoryABI, SaleABI, MockERC20ABI } from '../../lib/contracts/abis';
+import { SALE_FACTORY_ADDRESS } from '../../lib/constants';
+import Link from 'next/link';
 
 interface SaleDashboardCardProps {
   saleAddress: `0x${string}`;
+  saleDetails: any; // Raw data from useReadContracts
+  currencySymbol: string | undefined;
+  currencyDecimals: number | undefined;
   userAddress: `0x${string}`;
 }
 
-function SaleDashboardCard({ saleAddress, userAddress }: SaleDashboardCardProps) {
-  const { data: beneficiary } = useReadContract({
-    address: saleAddress,
-    abi: SaleABI,
-    functionName: 'BENEFICIARY',
-  });
-
-  const { data: tokenId } = useReadContract({
-    address: saleAddress,
-    abi: SaleABI,
-    functionName: 'TOKEN_ID',
-  });
-
-  const { data: currencyAddress } = useReadContract({
-    address: saleAddress,
-    abi: SaleABI,
-    functionName: 'CURRENCY',
-  });
-
-  const { data: price } = useReadContract({
-    address: saleAddress,
-    abi: SaleABI,
-    functionName: 'PRICE',
-  });
-
-  const { data: maxPointsToSell } = useReadContract({
-    address: saleAddress,
-    abi: SaleABI,
-    functionName: 'MAX_POINTS_TO_SELL',
-  });
-
-  const { data: minPointsToSell } = useReadContract({
-    address: saleAddress,
-    abi: SaleABI,
-    functionName: 'MIN_POINTS_TO_SELL',
-  });
-
-  const { data: saleStartTime } = useReadContract({
-    address: saleAddress,
-    abi: SaleABI,
-    functionName: 'SALE_START_TIME',
-  });
-
-  const { data: saleEndTime } = useReadContract({
-    address: saleAddress,
-    abi: SaleABI,
-    functionName: 'SALE_END_TIME',
-  });
-
-  const { data: totalPointsSold } = useReadContract({
-    address: saleAddress,
-    abi: SaleABI,
-    functionName: 'totalPointsSold',
-  });
-
-  const { data: saleState } = useReadContract({
-    address: saleAddress,
-    abi: SaleABI,
-    functionName: 'saleState',
-  });
-
-  const { data: currencySymbol } = useReadContract({
-    address: currencyAddress as `0x${string}`,
-    abi: MockERC20ABI,
-    functionName: 'symbol',
-    query: { enabled: !!currencyAddress },
-  });
-
-  const { data: currencyDecimals } = useReadContract({
-    address: currencyAddress as `0x${string}`,
-    abi: MockERC20ABI,
-    functionName: 'decimals',
-    query: { enabled: !!currencyAddress },
-  });
+function SaleDashboardCard({ saleAddress, saleDetails, currencySymbol, currencyDecimals, userAddress }: SaleDashboardCardProps) {
+  const price = saleDetails[3]?.result;
+  const maxPointsToSell = saleDetails[4]?.result;
+  const minPointsToSell = saleDetails[5]?.result;
+  const saleStartTime = saleDetails[6]?.result;
+  const saleEndTime = saleDetails[7]?.result;
+  const totalPointsSold = saleDetails[8]?.result;
+  const saleState = saleDetails[9]?.result;
 
   const { writeContract: writeWithdraw, data: withdrawHash, isPending: isWithdrawing } = useWriteContract();
   const { isLoading: isWithdrawConfirming, isSuccess: isWithdrawSuccess } = useWaitForTransactionReceipt({
@@ -116,11 +54,6 @@ function SaleDashboardCard({ saleAddress, userAddress }: SaleDashboardCardProps)
     });
   };
 
-  const isLoading = !beneficiary || !tokenId || !currencyAddress || !price || !maxPointsToSell || !minPointsToSell ||
-                    !saleStartTime || !saleEndTime || !totalPointsSold || !saleState || !currencySymbol || !currencyDecimals;
-
-  if (isLoading) return <div className="p-4 border rounded-lg shadow-sm">Loading sale...</div>;
-
   const formatTimestamp = (timestamp: bigint | undefined) => {
     if (!timestamp) return 'N/A';
     return new Date(Number(timestamp) * 1000).toLocaleString();
@@ -140,8 +73,6 @@ function SaleDashboardCard({ saleAddress, userAddress }: SaleDashboardCardProps)
   const currentTimestamp = Math.floor(Date.now() / 1000);
   const isSaleEnded = currentTimestamp > Number(saleEndTime);
   const isSaleSuccessful = saleState === 2;
-  const isSaleFailed = saleState === 3;
-  const isSaleActive = saleState === 1;
 
   const totalRaised = totalPointsSold && price && currencyDecimals !== undefined
     ? formatUnits(totalPointsSold * price, currencyDecimals)
@@ -194,7 +125,6 @@ export default function DashboardPage() {
   });
 
   const [allSaleAddresses, setAllSaleAddresses] = useState<`0x${string}`[]>([]);
-  const [mySales, setMySales] = useState<`0x${string}`[]>([]);
 
   // Fetch all deployed sale addresses
   useEffect(() => {
@@ -218,32 +148,53 @@ export default function DashboardPage() {
     fetchAddresses();
   }, [deployedSalesLength]);
 
-  // Filter sales by beneficiary
-  useEffect(() => {
-    const filterMySales = async () => {
-      if (!address || allSaleAddresses.length === 0) {
-        setMySales([]);
-        return;
-      }
+  // Prepare contracts array for useReadContracts for all sales
+  const allSaleContracts = allSaleAddresses.flatMap(addr => [
+    { address: addr, abi: SaleABI, functionName: 'BENEFICIARY' },
+    { address: addr, abi: SaleABI, functionName: 'PRICE' },
+    { address: addr, abi: SaleABI, functionName: 'MAX_POINTS_TO_SELL' },
+    { address: addr, abi: SaleABI, functionName: 'MIN_POINTS_TO_SELL' },
+    { address: addr, abi: SaleABI, functionName: 'SALE_START_TIME' },
+    { address: addr, abi: SaleABI, functionName: 'SALE_END_TIME' },
+    { address: addr, abi: SaleABI, functionName: 'totalPointsSold' },
+    { address: addr, abi: SaleABI, functionName: 'saleState' },
+    { address: addr, abi: SaleABI, functionName: 'CURRENCY' }, // Added currency address to fetch currency details
+  ]);
 
-      const filtered: `0x${string}`[] = [];
-      for (const saleAddress of allSaleAddresses) {
-        const { data: beneficiary } = await useReadContract({
-          address: saleAddress,
-          abi: SaleABI,
-          functionName: 'BENEFICIARY',
-        });
-        if (beneficiary && beneficiary.toLowerCase() === address.toLowerCase()) {
-          filtered.push(saleAddress);
-        }
-      }
-      setMySales(filtered);
+  const { data: allSalesData, isLoading: isLoadingAllSalesData } = useReadContracts({
+    contracts: allSaleContracts,
+    query: { enabled: allSaleAddresses.length > 0 },
+  });
+
+  // Filter and process sales for the current user
+  const mySales = allSaleAddresses.filter((addr, index) => {
+    const startIndex = index * 9; // 9 calls per sale
+    const beneficiary = allSalesData?.[startIndex]?.result as `0x${string}`;
+    return beneficiary && beneficiary.toLowerCase() === address?.toLowerCase();
+  }).map((addr, index) => {
+    const startIndex = allSaleAddresses.indexOf(addr) * 9; // Find original index to get data
+    const details = allSalesData?.slice(startIndex, startIndex + 9);
+    const currencyAddress = details?.[8]?.result as `0x${string}`;
+    return {
+      saleAddress: addr,
+      details: details,
+      currencyAddress: currencyAddress,
     };
-    filterMySales();
-  }, [address, allSaleAddresses]);
+  });
+
+  // Fetch currency symbols and decimals in batch for my sales
+  const myCurrencyContracts = mySales.flatMap(sale => [
+    { address: sale.currencyAddress, abi: MockERC20ABI, functionName: 'symbol' },
+    { address: sale.currencyAddress, abi: MockERC20ABI, functionName: 'decimals' },
+  ]);
+
+  const { data: myCurrencyData, isLoading: isLoadingMyCurrencyData } = useReadContracts({
+    contracts: myCurrencyContracts,
+    query: { enabled: mySales.length > 0 && myCurrencyContracts.every(c => !!c.address) },
+  });
 
   if (!isConnected) return <div className="text-center p-8">Please connect your wallet to view your dashboard.</div>;
-  if (isLoadingLength) return <div className="text-center p-8">Loading your sales...</div>;
+  if (isLoadingLength || isLoadingAllSalesData || isLoadingMyCurrencyData) return <div className="text-center p-8">Loading your sales...</div>;
 
   return (
     <div className="container mx-auto p-4">
@@ -252,9 +203,21 @@ export default function DashboardPage() {
         {mySales.length === 0 ? (
           <p>You haven't created any sales yet. Go to <Link href="/create" className="text-blue-500 hover:underline">Create Digital Points Card</Link> to launch one!</p>
         ) : (
-          mySales.map((addr) => (
-            <SaleDashboardCard key={addr} saleAddress={addr} userAddress={address} />
-          ))
+          mySales.map((sale, index) => {
+            const currencySymbol = myCurrencyData?.[index * 2]?.result as string;
+            const currencyDecimals = myCurrencyData?.[index * 2 + 1]?.result as number;
+
+            return (
+              <SaleDashboardCard
+                key={sale.saleAddress}
+                saleAddress={sale.saleAddress}
+                saleDetails={sale.details}
+                currencySymbol={currencySymbol}
+                currencyDecimals={currencyDecimals}
+                userAddress={address as `0x${string}`}
+              />
+            );
+          })
         )}
       </div>
     </div>
