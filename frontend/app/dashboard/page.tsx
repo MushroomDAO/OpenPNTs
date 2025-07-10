@@ -1,225 +1,215 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useAccount, useReadContract, useReadContracts, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
-import { formatUnits } from 'viem';
-import { SaleFactoryABI, SaleABI, MockERC20ABI } from '../../lib/contracts/abis';
-import { SALE_FACTORY_ADDRESS } from '../../lib/constants';
-import Link from 'next/link';
+import { useAccount } from 'wagmi';
+import { useState, useEffect } from 'react';
+import ClientOnly from '../components/ClientOnly';
 
-interface SaleDashboardCardProps {
-  saleAddress: `0x${string}`;
-  saleDetails: any; // Raw data from useReadContracts
-  currencySymbol: string | undefined;
-  currencyDecimals: number | undefined;
-  userAddress: `0x${string}`;
+interface UserPNT {
+  id: string;
+  name: string;
+  symbol: string;
+  balance: string;
+  totalSupply: string;
+  description: string;
 }
 
-function SaleDashboardCard({ saleAddress, saleDetails, currencySymbol, currencyDecimals, userAddress }: SaleDashboardCardProps) {
-  const price = saleDetails[3]?.result;
-  const maxPointsToSell = saleDetails[4]?.result;
-  const minPointsToSell = saleDetails[5]?.result;
-  const saleStartTime = saleDetails[6]?.result;
-  const saleEndTime = saleDetails[7]?.result;
-  const totalPointsSold = saleDetails[8]?.result;
-  const saleState = saleDetails[9]?.result;
+interface UserParticipation {
+  id: string;
+  saleName: string;
+  amount: string;
+  tokens: string;
+  status: 'Pending' | 'Successful' | 'Failed';
+}
 
-  const { writeContract: writeWithdraw, data: withdrawHash, isPending: isWithdrawing } = useWriteContract();
-  const { isLoading: isWithdrawConfirming, isSuccess: isWithdrawSuccess } = useWaitForTransactionReceipt({
-    hash: withdrawHash,
-  });
+function DashboardContent() {
+  const { address, isConnected } = useAccount();
+  const [userPNTs, setUserPNTs] = useState<UserPNT[]>([]);
+  const [participations, setParticipations] = useState<UserParticipation[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const { writeContract: writeFinalize, data: finalizeHash, isPending: isFinalizing } = useWriteContract();
-  const { isLoading: isFinalizeConfirming, isSuccess: isFinalizeSuccess } = useWaitForTransactionReceipt({
-    hash: finalizeHash,
-  });
+  useEffect(() => {
+    if (isConnected) {
+      // Simulate loading user data
+      const timer = setTimeout(() => {
+        setUserPNTs([
+          {
+            id: '1',
+            name: '咖啡积分',
+            symbol: 'COFFEE',
+            balance: '150',
+            totalSupply: '1000',
+            description: '可在Alice咖啡店兑换饮品'
+          },
+          {
+            id: '2',
+            name: '健身积分',
+            symbol: 'FITNESS',
+            balance: '80',
+            totalSupply: '500',
+            description: '健身房会员积分'
+          }
+        ]);
 
-  const handleWithdraw = () => {
-    if (!userAddress) return;
-    writeWithdraw({
-      address: saleAddress,
-      abi: SaleABI,
-      functionName: 'withdraw',
-      args: [],
-    });
-  };
+        setParticipations([
+          {
+            id: '1',
+            saleName: 'Alice咖啡店积分',
+            amount: '0.15',
+            tokens: '150',
+            status: 'Successful'
+          },
+          {
+            id: '2',
+            saleName: '健身房会员积分',
+            amount: '0.4',
+            tokens: '80',
+            status: 'Successful'
+          }
+        ]);
 
-  const handleFinalize = () => {
-    if (!userAddress) return;
-    writeFinalize({
-      address: saleAddress,
-      abi: SaleABI,
-      functionName: 'finalize',
-      args: [],
-    });
-  };
+        setLoading(false);
+      }, 1000);
 
-  const formatTimestamp = (timestamp: bigint | undefined) => {
-    if (!timestamp) return 'N/A';
-    return new Date(Number(timestamp) * 1000).toLocaleString();
-  };
+      return () => clearTimeout(timer);
+    }
+  }, [isConnected]);
 
-  const getSaleStateString = (state: number | undefined) => {
-    switch (state) {
-      case 0: return 'Pending';
-      case 1: return 'Active';
-      case 2: return 'Successful';
-      case 3: return 'Failed';
-      case 4: return 'Closed';
-      default: return 'Unknown';
+  const getStatusColor = (status: UserParticipation['status']) => {
+    switch (status) {
+      case 'Successful':
+        return 'bg-green-100 text-green-800';
+      case 'Pending':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'Failed':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
-  const currentTimestamp = Math.floor(Date.now() / 1000);
-  const isSaleEnded = currentTimestamp > Number(saleEndTime);
-  const isSaleSuccessful = saleState === 2;
+  if (!isConnected) {
+    return (
+      <div className="container mx-auto p-4">
+        <div className="text-center p-8">
+          <h1 className="text-3xl font-bold mb-4">用户仪表板</h1>
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 max-w-md mx-auto">
+            <p className="text-yellow-800 mb-4">请连接钱包以查看您的积分和参与记录</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
-  const totalRaised = totalPointsSold && price && currencyDecimals !== undefined
-    ? formatUnits(totalPointsSold * price, currencyDecimals)
-    : 'N/A';
+  if (loading) {
+    return (
+      <div className="container mx-auto p-4">
+        <div className="text-center p-8">
+          <h1 className="text-3xl font-bold mb-4">用户仪表板</h1>
+          <p>正在加载您的数据...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="p-4 border rounded-lg shadow-md">
-      <h3 className="text-xl font-semibold mb-2">Sale: {saleAddress.slice(0, 6)}...{saleAddress.slice(-4)}</h3>
-      <p><strong>Status:</strong> {getSaleStateString(saleState)}</p>
-      <p><strong>Points Sold:</strong> {totalPointsSold?.toString()} / {maxPointsToSell?.toString()}</p>
-      <p><strong>Total Raised:</strong> {totalRaised} {currencySymbol}</p>
-      <p><strong>Ends:</strong> {formatTimestamp(saleEndTime)}</p>
+    <div className="container mx-auto p-4">
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold mb-2">用户仪表板</h1>
+        <p className="text-gray-600">钱包地址: {address}</p>
+      </div>
 
-      <div className="mt-4 space-x-2">
-        {isSaleEnded && (saleState === 0 || saleState === 1) && (
-          <button
-            className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 disabled:opacity-50"
-            onClick={handleFinalize}
-            disabled={isFinalizing || isFinalizeConfirming}
-          >
-            {isFinalizing || isFinalizeConfirming ? 'Finalizing...' : 'Finalize Sale'}
-          </button>
-        )}
+      {/* 用户拥有的积分 */}
+      <div className="mb-8">
+        <h2 className="text-2xl font-semibold mb-4">我的积分</h2>
+        {userPNTs.length === 0 ? (
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 text-center">
+            <p className="text-gray-600">您还没有任何积分</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {userPNTs.map((pnt) => (
+              <div key={pnt.id} className="bg-white p-4 rounded-lg shadow-md border">
+                <div className="mb-3">
+                  <h3 className="text-lg font-semibold">{pnt.name}</h3>
+                  <p className="text-sm text-gray-600">{pnt.symbol}</p>
+                </div>
+                
+                <div className="mb-3">
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-sm text-gray-600">余额</span>
+                    <span className="font-semibold">{pnt.balance}</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div 
+                      className="bg-blue-600 h-2 rounded-full" 
+                      style={{ width: `${(parseInt(pnt.balance) / parseInt(pnt.totalSupply)) * 100}%` }}
+                    ></div>
+                  </div>
+                  <div className="text-xs text-gray-500 mt-1">
+                    总供应量: {pnt.totalSupply}
+                  </div>
+                </div>
 
-        {isSaleSuccessful && (
-          <button
-            className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50"
-            onClick={handleWithdraw}
-            disabled={isWithdrawing || isWithdrawConfirming}
-          >
-            {isWithdrawing || isWithdrawConfirming ? 'Withdrawing...' : 'Withdraw Funds'}
-          </button>
+                <p className="text-sm text-gray-600">{pnt.description}</p>
+              </div>
+            ))}
+          </div>
         )}
       </div>
-      {withdrawHash && <p className="mt-2 text-sm text-gray-600">Withdraw Tx: <a href={`https://sepolia.etherscan.io/tx/${withdrawHash}`} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">{withdrawHash}</a></p>}
-      {finalizeHash && <p className="mt-2 text-sm text-gray-600">Finalize Tx: <a href={`https://sepolia.etherscan.io/tx/${finalizeHash}`} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">{finalizeHash}</a></p>}
+
+      {/* 参与记录 */}
+      <div>
+        <h2 className="text-2xl font-semibold mb-4">参与记录</h2>
+        {participations.length === 0 ? (
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 text-center">
+            <p className="text-gray-600">您还没有参与任何预售</p>
+          </div>
+        ) : (
+          <div className="bg-white rounded-lg shadow-md overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">预售名称</th>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">投入金额</th>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">获得积分</th>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">状态</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {participations.map((participation) => (
+                    <tr key={participation.id} className="border-t border-gray-200">
+                      <td className="px-4 py-3 text-sm">{participation.saleName}</td>
+                      <td className="px-4 py-3 text-sm">{participation.amount} ETH</td>
+                      <td className="px-4 py-3 text-sm">{participation.tokens}</td>
+                      <td className="px-4 py-3">
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(participation.status)}`}>
+                          {participation.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
 
 export default function DashboardPage() {
-  const { address, isConnected } = useAccount();
-
-  const { data: deployedSalesLength, isLoading: isLoadingLength } = useReadContract({
-    address: SALE_FACTORY_ADDRESS,
-    abi: SaleFactoryABI,
-    functionName: 'deployedSales',
-    args: [],
-    query: { select: (data: any) => data.length },
-  });
-
-  const [allSaleAddresses, setAllSaleAddresses] = useState<`0x${string}`[]>([]);
-
-  // Fetch all deployed sale addresses
-  useEffect(() => {
-    const fetchAddresses = async () => {
-      if (deployedSalesLength === undefined) return;
-
-      const addresses: `0x${string}`[] = [];
-      for (let i = 0; i < Number(deployedSalesLength); i++) {
-        const { data: saleAddress } = await useReadContract({
-          address: SALE_FACTORY_ADDRESS,
-          abi: SaleFactoryABI,
-          functionName: 'deployedSales',
-          args: [BigInt(i)],
-        });
-        if (saleAddress) {
-          addresses.push(saleAddress as `0x${string}`);
-        }
-      }
-      setAllSaleAddresses(addresses);
-    };
-    fetchAddresses();
-  }, [deployedSalesLength]);
-
-  // Prepare contracts array for useReadContracts for all sales
-  const allSaleContracts = allSaleAddresses.flatMap(addr => [
-    { address: addr, abi: SaleABI, functionName: 'BENEFICIARY' },
-    { address: addr, abi: SaleABI, functionName: 'PRICE' },
-    { address: addr, abi: SaleABI, functionName: 'MAX_POINTS_TO_SELL' },
-    { address: addr, abi: SaleABI, functionName: 'MIN_POINTS_TO_SELL' },
-    { address: addr, abi: SaleABI, functionName: 'SALE_START_TIME' },
-    { address: addr, abi: SaleABI, functionName: 'SALE_END_TIME' },
-    { address: addr, abi: SaleABI, functionName: 'totalPointsSold' },
-    { address: addr, abi: SaleABI, functionName: 'saleState' },
-    { address: addr, abi: SaleABI, functionName: 'CURRENCY' }, // Added currency address to fetch currency details
-  ]);
-
-  const { data: allSalesData, isLoading: isLoadingAllSalesData } = useReadContracts({
-    contracts: allSaleContracts,
-    query: { enabled: allSaleAddresses.length > 0 },
-  });
-
-  // Filter and process sales for the current user
-  const mySales = allSaleAddresses.filter((addr, index) => {
-    const startIndex = index * 9; // 9 calls per sale
-    const beneficiary = allSalesData?.[startIndex]?.result as `0x${string}`;
-    return beneficiary && beneficiary.toLowerCase() === address?.toLowerCase();
-  }).map((addr, index) => {
-    const startIndex = allSaleAddresses.indexOf(addr) * 9; // Find original index to get data
-    const details = allSalesData?.slice(startIndex, startIndex + 9);
-    const currencyAddress = details?.[8]?.result as `0x${string}`;
-    return {
-      saleAddress: addr,
-      details: details,
-      currencyAddress: currencyAddress,
-    };
-  });
-
-  // Fetch currency symbols and decimals in batch for my sales
-  const myCurrencyContracts = mySales.flatMap(sale => [
-    { address: sale.currencyAddress, abi: MockERC20ABI, functionName: 'symbol' },
-    { address: sale.currencyAddress, abi: MockERC20ABI, functionName: 'decimals' },
-  ]);
-
-  const { data: myCurrencyData, isLoading: isLoadingMyCurrencyData } = useReadContracts({
-    contracts: myCurrencyContracts,
-    query: { enabled: mySales.length > 0 && myCurrencyContracts.every(c => !!c.address) },
-  });
-
-  if (!isConnected) return <div className="text-center p-8">Please connect your wallet to view your dashboard.</div>;
-  if (isLoadingLength || isLoadingAllSalesData || isLoadingMyCurrencyData) return <div className="text-center p-8">Loading your sales...</div>;
-
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-6">Your Sales Dashboard</h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {mySales.length === 0 ? (
-          <p>You haven't created any sales yet. Go to <Link href="/create" className="text-blue-500 hover:underline">Create Digital Points Card</Link> to launch one!</p>
-        ) : (
-          mySales.map((sale, index) => {
-            const currencySymbol = myCurrencyData?.[index * 2]?.result as string;
-            const currencyDecimals = myCurrencyData?.[index * 2 + 1]?.result as number;
-
-            return (
-              <SaleDashboardCard
-                key={sale.saleAddress}
-                saleAddress={sale.saleAddress}
-                saleDetails={sale.details}
-                currencySymbol={currencySymbol}
-                currencyDecimals={currencyDecimals}
-                userAddress={address as `0x${string}`}
-              />
-            );
-          })
-        )}
+    <ClientOnly fallback={
+      <div className="container mx-auto p-4">
+        <div className="text-center p-8">
+          <h1 className="text-3xl font-bold mb-4">用户仪表板</h1>
+          <p>正在加载...</p>
+        </div>
       </div>
-    </div>
+    }>
+      <DashboardContent />
+    </ClientOnly>
   );
 }

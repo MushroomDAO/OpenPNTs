@@ -1,33 +1,35 @@
 'use client';
 
-import React from 'react';
-import { WagmiProvider, createConfig, http } from 'wagmi';
-import { sepolia } from 'wagmi/chains';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { injected, metaMask, walletConnect } from '@wagmi/connectors'; // Original import
+import { WagmiProvider } from 'wagmi';
+import { config } from '../lib/wagmi';
+import { useState, ReactNode, useEffect } from 'react';
 
-// Configure chains
-const chains = [
-  sepolia,
-];
+interface ProvidersProps {
+  children: ReactNode;
+}
 
-// Create Wagmi config
-const config = createConfig({
-  chains,
-  connectors: [
-    injected(),
-    metaMask(),
-    walletConnect({ projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || '' }),
-  ],
-  transports: {
-    [sepolia.id]: http(process.env.NEXT_PUBLIC_SEPOLIA_RPC_URL || 'https://sepolia.infura.io/v3/YOUR_INFURA_PROJECT_ID'), // Fallback for direct pnpm dev
-  },
-});
+export function Providers({ children }: ProvidersProps) {
+  const [mounted, setMounted] = useState(false);
+  const [queryClient] = useState(() => new QueryClient({
+    defaultOptions: {
+      queries: {
+        staleTime: 60 * 1000, // 1分钟
+        refetchOnWindowFocus: false,
+        retry: false, // 防止SSR期间重试
+      },
+    },
+  }));
 
-// Create a React Query client
-const queryClient = new QueryClient();
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
-export function Providers({ children }: { children: React.ReactNode }) {
+  // 防止SSR期间渲染Web3组件
+  if (!mounted) {
+    return <div>{children}</div>;
+  }
+
   return (
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>

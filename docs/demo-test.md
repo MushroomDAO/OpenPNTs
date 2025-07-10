@@ -73,27 +73,27 @@ function SaleContent() {
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-3xl font-bold mb-6">{saleData?.name || '忠诚积分预售'}</h1>
-      <p className="text-lg mb-4">销售地址: {saleAddress}</p>
+      <p className="text-lg mb-4">销售地址：{saleAddress}</p>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         <div className="bg-white p-6 rounded-lg shadow-md">
           <h2 className="text-xl font-semibold mb-4">销售详情</h2>
           <div className="space-y-2">
-            <p><strong>状态:</strong> <span className="text-green-600">{saleData?.status}</span></p>
-            <p><strong>代币ID:</strong> {saleData?.tokenId}</p>
-            <p><strong>价格:</strong> {saleData?.price} ETH / 积分</p>
-            <p><strong>可用积分:</strong> {saleData?.pointsAvailable}</p>
-            <p><strong>已售积分:</strong> {saleData?.pointsSold}</p>
-            <p><strong>受益人:</strong> {saleData?.beneficiary}</p>
+            <p><strong>状态：</strong> <span className="text-green-600">{saleData?.status}</span></p>
+            <p><strong>代币 ID:</strong> {saleData?.tokenId}</p>
+            <p><strong>价格：</strong> {saleData?.price} ETH / 积分</p>
+            <p><strong>可用积分：</strong> {saleData?.pointsAvailable}</p>
+            <p><strong>已售积分：</strong> {saleData?.pointsSold}</p>
+            <p><strong>受益人：</strong> {saleData?.beneficiary}</p>
           </div>
         </div>
 
         <div className="bg-white p-6 rounded-lg shadow-md">
           <h2 className="text-xl font-semibold mb-4">积分信息</h2>
           <div className="space-y-2">
-            <p><strong>名称:</strong> Demo 积分</p>
-            <p><strong>符号:</strong> DPT</p>
-            <p><strong>描述:</strong> 演示用的忠诚积分</p>
+            <p><strong>名称：</strong> Demo 积分</p>
+            <p><strong>符号：</strong> DPT</p>
+            <p><strong>描述：</strong> 演示用的忠诚积分</p>
           </div>
         </div>
       </div>
@@ -123,7 +123,7 @@ function SaleContent() {
           
           <div className="mt-6">
             <h3 className="text-lg font-semibold mb-2">您的活动</h3>
-            <p>您购买的积分: 0</p>
+            <p>您购买的积分：0</p>
           </div>
         </div>
       ) : (
@@ -146,6 +146,73 @@ export default function SalePage() {
       </div>
     }>
       <SaleContent />
+    </ClientOnly>
+  );
+}
+
+                <p className="text-sm text-gray-600">{pnt.description}</p>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* 参与记录 */}
+      <div>
+        <h2 className="text-2xl font-semibold mb-4">参与记录</h2>
+        {participations.length === 0 ? (
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 text-center">
+            <p className="text-gray-600">您还没有参与任何预售</p>
+          </div>
+        ) : (
+          <div className="bg-white rounded-lg shadow-md overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">预售名称</th>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">投入金额</th>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">获得积分</th>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">状态</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {participations.map((participation) => (
+                    <tr key={participation.id} className="border-t border-gray-200">
+                      <td className="px-4 py-3 text-sm">{participation.saleName}</td>
+                      <td className="px-4 py-3 text-sm">{participation.amount} ETH</td>
+                      <td className="px-4 py-3 text-sm">{participation.tokens}</td>
+                      <td className="px-4 py-3">
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(participation.status)}`}>
+                          {participation.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <ClientOnly fallback={
+      <div className="container mx-auto p-4">
+        <div className="text-center p-8">
+          <h1 className="text-3xl font-bold mb-4">用户仪表板</h1>
+          <p>正在加载...</p>
+        </div>
+      </div>
+    }>
+      <DashboardContent />
+    </ClientOnly>
+  );
+}     <SalesContent />
     </ClientOnly>
   );
 }
