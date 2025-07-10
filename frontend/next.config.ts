@@ -20,6 +20,21 @@ const nextConfig: NextConfig = {
     };
     return config;
   },
+  
+  // 自定义headers来阻止Service Worker请求
+  async headers() {
+    return [
+      {
+        source: '/sw.js',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'no-store, no-cache, must-revalidate',
+          },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;
