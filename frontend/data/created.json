@@ -1,0 +1,90 @@
+{
+  "created": [
+    {
+      "id": "create_001",
+      "tokenId": "1",
+      "contractAddress": "0x1234567890abcdef1234567890abcdef12345678",
+      "saleAddress": "0x2345678901bcdef12345678901bcdef123456789",
+      "transactionHash": "0x9876543210fedcba9876543210fedcba987654321098765432109876543210abcd",
+      "blockNumber": 18745632,
+      "creator": "alice.coffee.eth",
+      "name": {
+        "zh": "Alice咖啡积分",
+        "en": "Alice Coffee Points"
+      },
+      "description": {
+        "zh": "精品咖啡店忠诚度积分，可享受饮品折扣、免费升级和特别活动优惠。",
+        "en": "Premium coffee shop loyalty points, enjoy beverage discounts, free upgrades, and special event offers."
+      },
+      "totalSupply": "10000",
+      "pricePerPNT": "0.001",
+      "minGoal": "5000",
+      "createdAt": "2024-07-11T10:30:00Z",
+      "status": "deployed",
+      "category": "food",
+      "gasUsed": "2847592",
+      "platformFee": "1.5"
+    },
+    {
+      "id": "create_002",
+      "tokenId": "2",
+      "contractAddress": "0x3456789012cdef123456789012cdef1234567890",
+      "saleAddress": "0x456789013def123456789013def12345678901a",
+      "transactionHash": "0x8765432109edcba8765432109edcba8765432109876543210987654321089bc",
+      "blockNumber": 18745641,
+      "creator": "bob.fitness.eth",
+      "name": {
+        "zh": "Bob健身俱乐部积分",
+        "en": "Bob Fitness Club Points"
+      },
+      "description": {
+        "zh": "现代化健身房积分，可兑换私教课程、团体课程和营养咨询服务。",
+        "en": "Modern gym points, redeemable for personal training, group classes, and nutrition consultation services."
+      },
+      "totalSupply": "5000",
+      "pricePerPNT": "0.002",
+      "minGoal": "2000",
+      "createdAt": "2024-07-11T11:15:00Z",
+      "status": "deployed",
+      "category": "fitness",
+      "gasUsed": "2756834",
+      "platformFee": "1.5"
+    },
+    {
+      "id": "create_003",
+      "tokenId": "3",
+      "contractAddress": "0x56789014ef123456789014ef123456789012b",
+      "saleAddress": "0x6789015f123456789015f123456789013c",
+      "transactionHash": "0x7654321098dcba7654321098dcba7654321098765432109876543210987ab",
+      "blockNumber": 18745650,
+      "creator": "diana.beauty.eth",
+      "name": {
+        "zh": "Diana美容SPA积分",
+        "en": "Diana Beauty SPA Points"
+      },
+      "description": {
+        "zh": "高端美容SPA积分，包含面部护理、身体护理和专业化妆服务。",
+        "en": "Premium beauty SPA points, including facial care, body care, and professional makeup services."
+      },
+      "totalSupply": "3000",
+      "pricePerPNT": "0.003",
+      "minGoal": "1500",
+      "createdAt": "2024-07-11T14:20:00Z",
+      "status": "pending",
+      "category": "beauty",
+      "gasUsed": "2865421",
+      "platformFee": "1.5"
+    }
+  ],
+  "metadata": {
+    "version": "1.0.0",
+    "lastUpdated": "2024-07-11T15:00:00Z",
+    "totalCreated": 3,
+    "deployedCount": 2,
+    "pendingCount": 1,
+    "categories": ["food", "fitness", "beauty", "retail", "entertainment"],
+    "averageGasUsed": "2823282",
+    "totalTokensCreated": "18000",
+    "nextTokenId": "4"
+  }
+} 

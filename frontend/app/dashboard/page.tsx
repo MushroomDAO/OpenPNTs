@@ -3,141 +3,136 @@
 import { useAirAccount } from '../providers';
 import { useState, useEffect } from 'react';
 import { formatPNTs } from '../../lib/airaccount';
+import { useI18n } from '../../lib/i18n';
 import ClientOnly from '../components/ClientOnly';
+import { TransactionLink } from '../components/BlockchainLinks';
 
-interface UserPNTHolding {
+interface UserHolding {
   id: string;
   name: string;
+  balance: number;
   issuer: string;
-  balance: string;
+  status: 'active' | 'suspended';
   totalSupply: string;
   description: string;
-  canUse: boolean;
 }
 
 interface UserTransaction {
   id: string;
   type: 'purchase' | 'reward' | 'spend' | 'transfer';
-  amount: string;
+  amount: number;
   description: string;
   timestamp: string;
   status: 'completed' | 'pending' | 'failed';
+  hash: string;
+  pointsName: string;
 }
 
 function DashboardContent() {
-  const { user, isLoading, refreshBalance } = useAirAccount();
-  const [holdings, setHoldings] = useState<UserPNTHolding[]>([]);
+  const { user, isLoading } = useAirAccount();
+  const { t } = useI18n();
+  const [holdings, setHoldings] = useState<UserHolding[]>([]);
   const [transactions, setTransactions] = useState<UserTransaction[]>([]);
-  const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     if (user) {
       // 模拟加载用户数据
-      const timer = setTimeout(() => {
-        setHoldings([
-          {
-            id: '1',
-            name: 'Alice咖啡积分',
-            issuer: 'alice.coffee.eth',
-            balance: '150',
-            totalSupply: '1000',
-            description: '可在Alice咖啡店兑换饮品和享受折扣',
-            canUse: true
-          },
-          {
-            id: '2',
-            name: 'Bob健身积分',
-            issuer: 'bob.fitness.eth',
-            balance: '80',
-            totalSupply: '500',
-            description: '健身房会员积分，可兑换课程和设备使用',
-            canUse: true
-          },
-          {
-            id: '3',
-            name: 'Charlie美食积分',
-            issuer: 'charlie.food.eth',
-            balance: '220',
-            totalSupply: '2000',
-            description: '餐厅积分，可享受美食折扣和免费餐点',
-            canUse: false
-          }
-        ]);
+      const mockHoldings: UserHolding[] = [
+        {
+          id: '1',
+          name: t('dashboard.mock_alice_coffee'),
+          balance: 250,
+          issuer: 'alice.coffee.eth',
+          status: 'active',
+          totalSupply: '10000',
+          description: t('dashboard.mock_alice_desc')
+        },
+        {
+          id: '2', 
+          name: t('dashboard.mock_bob_fitness'),
+          balance: 80,
+          issuer: 'bob.fitness.eth',
+          status: 'active',
+          totalSupply: '5000',
+          description: t('dashboard.mock_bob_desc')
+        },
+        {
+          id: '3',
+          name: t('dashboard.mock_charlie_food'),
+          balance: 0,
+          issuer: 'charlie.restaurant.eth',
+          status: 'suspended',
+          totalSupply: '8000',
+          description: t('dashboard.mock_charlie_desc')
+        }
+      ];
 
-        setTransactions([
-          {
-            id: '1',
-            type: 'purchase',
-            amount: '+150',
-            description: '购买Alice咖啡积分',
-            timestamp: '2024-07-10 14:30',
-            status: 'completed'
-          },
-          {
-            id: '2',
-            type: 'reward',
-            amount: '+50',
-            description: '转发Twitter获得奖励',
-            timestamp: '2024-07-09 16:45',
-            status: 'completed'
-          },
-          {
-            id: '3',
-            type: 'spend',
-            amount: '-20',
-            description: '在Alice咖啡店消费',
-            timestamp: '2024-07-08 09:15',
-            status: 'completed'
-          },
-          {
-            id: '4',
-            type: 'purchase',
-            amount: '+100',
-            description: '购买Charlie美食积分',
-            timestamp: '2024-07-07 11:20',
-            status: 'pending'
-          }
-        ]);
+      const mockTransactions: UserTransaction[] = [
+        {
+          id: '1',
+          type: 'purchase',
+          amount: 100,
+          description: t('dashboard.mock_tx_alice_purchase'),
+          timestamp: '2024-07-10T14:30:00Z',
+          status: 'completed',
+          hash: '0x1234567890abcdef1234567890abcdef12345678',
+          pointsName: t('dashboard.mock_alice_coffee')
+        },
+        {
+          id: '2',
+          type: 'reward',
+          amount: 50,
+          description: t('dashboard.mock_tx_twitter'),
+          timestamp: '2024-07-09T10:15:00Z',
+          status: 'completed',
+          hash: '0x2345678901bcdef12345678901bcdef123456789',
+          pointsName: 'PNTs'
+        },
+        {
+          id: '3',
+          type: 'spend',
+          amount: -30,
+          description: t('dashboard.mock_tx_alice_spend'),
+          timestamp: '2024-07-08T16:45:00Z',
+          status: 'completed',
+          hash: '0x3456789012cdef123456789012cdef1234567890',
+          pointsName: t('dashboard.mock_alice_coffee')
+        },
+        {
+          id: '4',
+          type: 'purchase',
+          amount: 80,
+          description: t('dashboard.mock_tx_charlie_purchase'),
+          timestamp: '2024-07-07T11:20:00Z',
+          status: 'completed',
+          hash: '0x456789013def123456789013def12345678901a',
+          pointsName: t('dashboard.mock_charlie_food')
+        }
+      ];
 
-        setLoading(false);
-      }, 1000);
-
-      return () => clearTimeout(timer);
+      setHoldings(mockHoldings);
+      setTransactions(mockTransactions);
     }
-  }, [user]);
+  }, [user, t]);
 
-  const handleRefreshBalance = async () => {
+  const handleRefresh = async () => {
     setRefreshing(true);
-    await refreshBalance();
+    // 模拟刷新延迟
+    await new Promise(resolve => setTimeout(resolve, 1000));
     setRefreshing(false);
   };
 
-  const getTransactionIcon = (type: UserTransaction['type']) => {
-    switch (type) {
-      case 'purchase': return '🛒';
-      case 'reward': return '🎁';
-      case 'spend': return '💳';
-      case 'transfer': return '↔️';
-      default: return '📄';
-    }
-  };
-
-  const getStatusColor = (status: UserTransaction['status']) => {
-    switch (status) {
-      case 'completed': return 'text-green-600 bg-green-100';
-      case 'pending': return 'text-yellow-600 bg-yellow-100';
-      case 'failed': return 'text-red-600 bg-red-100';
-      default: return 'text-gray-600 bg-gray-100';
-    }
+  const getTotalBalance = () => {
+    return holdings.reduce((total, holding) => total + holding.balance, 0);
   };
 
   if (isLoading) {
     return (
       <div className="container mx-auto p-4">
-        <div className="text-center p-8">
-          <h1 className="text-3xl font-bold mb-4">用户仪表板</h1>
-          <p>正在加载...</p>
+        <div className="max-w-4xl mx-auto text-center">
+          <h1 className="text-3xl font-bold mb-4">{t('dashboard.title')}</h1>
+          <p>{t('common.loading')}</p>
         </div>
       </div>
     );
@@ -146,17 +141,17 @@ function DashboardContent() {
   if (!user) {
     return (
       <div className="container mx-auto p-4">
-        <div className="text-center p-8">
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 max-w-md mx-auto">
-            <h1 className="text-3xl font-bold mb-4">用户仪表板</h1>
-            <p className="text-yellow-800 mb-4">请登录AirAccount以查看您的积分和交易记录</p>
+        <div className="max-w-4xl mx-auto">
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-8 text-center">
+            <h1 className="text-3xl font-bold mb-4">{t('dashboard.title')}</h1>
+            <p className="text-yellow-800 mb-4">{t('dashboard.login_required')}</p>
             <a 
               href="https://airaccount.aastar.io" 
               target="_blank" 
               rel="noopener noreferrer"
               className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors inline-block"
             >
-              获取AirAccount →
+              {t('dashboard.get_airaccount')}
             </a>
           </div>
         </div>
@@ -164,149 +159,149 @@ function DashboardContent() {
     );
   }
 
-  if (loading) {
-    return (
-      <div className="container mx-auto p-4">
-        <div className="text-center p-8">
-          <h1 className="text-3xl font-bold mb-4">用户仪表板</h1>
-          <p>正在加载您的数据...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="container mx-auto p-4">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-          用户仪表板
-        </h1>
-        <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg p-6 mb-6">
-          <div className="flex items-center justify-between">
+      <div className="max-w-4xl mx-auto">
+        {/* 用户信息卡片 */}
+        <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg p-6 mb-6">
+          <div className="flex justify-between items-start">
             <div>
-              <p className="text-gray-600 mb-2">欢迎回来</p>
-              <p className="text-xl font-semibold text-gray-800">{user.ens}</p>
-              <p className="text-sm text-gray-500">地址: {user.address}</p>
+              <h1 className="text-3xl font-bold mb-2">{t('dashboard.title')}</h1>
+              <p className="text-gray-200 mb-2">{t('dashboard.welcome')}</p>
+              <div className="flex items-center space-x-4 text-sm">
+                <span className="text-gray-300">{t('dashboard.address')}:</span>
+                <span className="font-mono">{user.ens}</span>
+              </div>
             </div>
             <div className="text-right">
-              <p className="text-gray-600 mb-2">总余额</p>
-              <p className="text-3xl font-bold text-purple-600">{formatPNTs(user.pntsBalance)}</p>
-              <button
+              <p className="text-gray-200 mb-2">{t('dashboard.total_balance')}</p>
+              <p className="text-2xl font-bold">{formatPNTs(getTotalBalance())}</p>
+              <button 
                 type="button"
-                onClick={handleRefreshBalance}
+                onClick={handleRefresh}
+                className="mt-2 text-sm bg-white bg-opacity-20 hover:bg-opacity-30 px-3 py-1 rounded transition-colors"
                 disabled={refreshing}
-                className="text-sm text-blue-600 hover:text-blue-800 disabled:opacity-50"
               >
-                {refreshing ? '刷新中...' : '🔄 刷新'}
+                {refreshing ? t('dashboard.refreshing') : t('dashboard.refresh')}
               </button>
             </div>
           </div>
         </div>
-      </div>
 
-      <div className="grid lg:grid-cols-2 gap-8">
-        {/* 积分持有情况 */}
-        <div className="bg-white rounded-lg shadow-lg p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-semibold text-gray-800">我的积分</h2>
-            <span className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm">
-              {holdings.length} 种积分
-            </span>
-          </div>
-
-          <div className="space-y-4">
-            {holdings.map((holding) => (
-              <div key={holding.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="font-semibold text-gray-800">{holding.name}</h3>
-                  <div className="flex items-center space-x-2">
-                    <span className="text-xl font-bold text-blue-600">{holding.balance}</span>
-                    {holding.canUse ? (
-                      <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">可用</span>
-                    ) : (
-                      <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">暂停</span>
-                    )}
-                  </div>
-                </div>
-                <p className="text-sm text-gray-600 mb-2">{holding.description}</p>
-                <div className="flex items-center justify-between text-xs text-gray-500">
-                  <span>发行方: {holding.issuer}</span>
-                  <span>总量: {holding.totalSupply}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {holdings.length === 0 && (
-            <div className="text-center py-8">
-              <p className="text-gray-500 mb-4">您还没有任何积分</p>
-              <a href="/sales" className="text-blue-600 hover:text-blue-800">
-                去购买积分 →
-              </a>
+        <div className="grid lg:grid-cols-2 gap-6">
+          {/* 积分持有情况 */}
+          <div className="bg-white rounded-lg shadow-lg p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-semibold text-gray-800">{t('dashboard.my_points')}</h2>
+              <span className="text-sm text-gray-500">
+                {holdings.length} {t('dashboard.point_types')}
+              </span>
             </div>
-          )}
+            
+            {holdings.length > 0 ? (
+              <div className="space-y-4">
+                {holdings.map((holding) => (
+                  <div key={holding.id} className="border border-gray-200 rounded-lg p-4">
+                    <div className="flex justify-between items-start mb-2">
+                      <h3 className="font-semibold text-gray-800">{holding.name}</h3>
+                      {holding.status === 'active' ? (
+                        <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">{t('dashboard.available')}</span>
+                      ) : (
+                        <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">{t('dashboard.suspended')}</span>
+                      )}
+                    </div>
+                    <p className="text-2xl font-bold text-blue-600 mb-2">{formatPNTs(holding.balance)}</p>
+                    <p className="text-sm text-gray-600 mb-2">{holding.description}</p>
+                    <div className="text-xs text-gray-500 flex justify-between">
+                      <span>{t('dashboard.issuer')}: {holding.issuer}</span>
+                      <span>{t('dashboard.total_supply')}: {holding.totalSupply}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-gray-500 mb-4">{t('dashboard.no_points')}</p>
+                <a href="/sales" className="text-blue-600 hover:text-blue-800">
+                  {t('dashboard.buy_points_link')}
+                </a>
+              </div>
+            )}
+          </div>
+
+          {/* 交易记录 */}
+          <div className="bg-white rounded-lg shadow-lg p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-semibold text-gray-800">{t('dashboard.transactions')}</h2>
+              <span className="text-sm text-gray-500">
+                {t('dashboard.recent_transactions')} {transactions.length} {t('dashboard.transactions_count')}
+              </span>
+            </div>
+            
+            {transactions.length > 0 ? (
+              <div className="space-y-3">
+                {transactions.slice(0, 5).map((tx) => (
+                  <div key={tx.id} className="border border-gray-200 rounded-lg p-3">
+                    <div className="flex justify-between items-start mb-2">
+                      <div>
+                        <h4 className="font-semibold text-gray-800">{tx.pointsName}</h4>
+                        <p className="text-sm text-gray-600">{tx.description}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className={`font-semibold ${tx.amount > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          {tx.amount > 0 ? '+' : ''}{formatPNTs(Math.abs(tx.amount))}
+                        </p>
+                        <span className={`text-xs px-2 py-1 rounded ${
+                          tx.status === 'completed' ? 'bg-green-100 text-green-800' : 
+                          tx.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
+                          'bg-red-100 text-red-800'
+                        }`}>
+                          {t(`transaction.${tx.status}`)}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex justify-between items-center text-xs text-gray-500">
+                      <span>{t('dashboard.transaction_hash')}:</span>
+                      <TransactionLink 
+                        txHash={tx.hash}
+                        className="text-blue-600 hover:text-blue-800"
+                      />
+                    </div>
+                    <div className="text-xs text-gray-500 mt-1">
+                      {new Date(tx.timestamp).toLocaleString()}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-gray-500">{t('dashboard.no_transactions')}</p>
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* 交易记录 */}
-        <div className="bg-white rounded-lg shadow-lg p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-semibold text-gray-800">交易记录</h2>
-            <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
-              最近 {transactions.length} 笔
-            </span>
-          </div>
-
-          <div className="space-y-3">
-            {transactions.map((tx) => (
-              <div key={tx.id} className="flex items-center justify-between p-3 border border-gray-100 rounded-lg hover:bg-gray-50 transition-colors">
-                <div className="flex items-center space-x-3">
-                  <span className="text-2xl">{getTransactionIcon(tx.type)}</span>
-                  <div>
-                    <p className="font-medium text-gray-800">{tx.description}</p>
-                    <p className="text-sm text-gray-500">{tx.timestamp}</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className={`font-semibold ${tx.amount.startsWith('+') ? 'text-green-600' : 'text-red-600'}`}>
-                    {tx.amount}
-                  </p>
-                  <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(tx.status)}`}>
-                    {tx.status === 'completed' ? '完成' : tx.status === 'pending' ? '进行中' : '失败'}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {transactions.length === 0 && (
-            <div className="text-center py-8">
-              <p className="text-gray-500">暂无交易记录</p>
+        {/* 快速操作 */}
+        <div className="mt-8 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-6">
+          <h2 className="text-2xl font-semibold text-gray-800 mb-4">{t('dashboard.quick_actions')}</h2>
+          <div className="grid md:grid-cols-3 gap-4">
+            <a href="/sales" className="bg-white rounded-lg p-4 text-center hover:shadow-md transition-shadow">
+              <div className="text-3xl mb-2">🛒</div>
+              <h3 className="font-semibold text-gray-800">{t('dashboard.buy_points_action')}</h3>
+              <p className="text-sm text-gray-600">{t('dashboard.buy_points_desc')}</p>
+            </a>
+            
+            <a href="/create" className="bg-white rounded-lg p-4 text-center hover:shadow-md transition-shadow">
+              <div className="text-3xl mb-2">🚀</div>
+              <h3 className="font-semibold text-gray-800">{t('dashboard.create_points')}</h3>
+              <p className="text-sm text-gray-600">{t('dashboard.create_points_desc')}</p>
+            </a>
+            
+            <div className="bg-white rounded-lg p-4 text-center opacity-50">
+              <div className="text-3xl mb-2">🎮</div>
+              <h3 className="font-semibold text-gray-800">{t('dashboard.play_to_earn')}</h3>
+              <p className="text-sm text-gray-600">{t('dashboard.play_to_earn_desc')}</p>
             </div>
-          )}
-        </div>
-      </div>
-
-      {/* 快速操作 */}
-      <div className="mt-8 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-6">
-        <h2 className="text-2xl font-semibold text-gray-800 mb-4">快速操作</h2>
-        <div className="grid md:grid-cols-3 gap-4">
-          <a href="/sales" className="bg-white rounded-lg p-4 text-center hover:shadow-md transition-shadow">
-            <div className="text-3xl mb-2">🛒</div>
-            <h3 className="font-semibold text-gray-800">购买积分</h3>
-            <p className="text-sm text-gray-600">浏览并购买商家积分</p>
-          </a>
-          
-          <a href="/create" className="bg-white rounded-lg p-4 text-center hover:shadow-md transition-shadow">
-            <div className="text-3xl mb-2">🚀</div>
-            <h3 className="font-semibold text-gray-800">发行积分</h3>
-            <p className="text-sm text-gray-600">创建您的积分卡</p>
-          </a>
-          
-          <div className="bg-white rounded-lg p-4 text-center opacity-50">
-            <div className="text-3xl mb-2">🎮</div>
-            <h3 className="font-semibold text-gray-800">游戏赚取</h3>
-            <p className="text-sm text-gray-600">敬请期待</p>
           </div>
         </div>
       </div>
@@ -318,9 +313,9 @@ export default function DashboardPage() {
   return (
     <ClientOnly fallback={
       <div className="container mx-auto p-4">
-        <div className="text-center p-8">
-          <h1 className="text-3xl font-bold mb-4">用户仪表板</h1>
-          <p>正在加载...</p>
+        <div className="max-w-4xl mx-auto text-center">
+          <h1 className="text-3xl font-bold mb-4">User Dashboard</h1>
+          <p>Loading...</p>
         </div>
       </div>
     }>

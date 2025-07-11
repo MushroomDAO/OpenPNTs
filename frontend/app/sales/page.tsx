@@ -2,140 +2,52 @@
 
 import { useState, useEffect } from 'react';
 import { useAirAccount } from '../providers';
+import { useLanguage } from '../../lib/i18n';
 import { formatPNTs } from '../../lib/airaccount';
+import { PNTSale, fetchSalesData, fetchSalesStats } from '../../lib/salesData';
 import Link from 'next/link';
 import ClientOnly from '../components/ClientOnly';
 
-interface PNTSale {
-  id: string;
-  address: string;
-  name: string;
-  issuer: string;
-  description: string;
-  status: 'Active' | 'Pending' | 'Successful' | 'Failed' | 'Closed';
-  pricePerPNT: string;
-  totalSupply: string;
-  soldAmount: string;
-  targetAmount: string;
-  endTime: string;
-  participants: number;
-  category: string;
-}
-
 function SalesContent() {
   const { user } = useAirAccount();
+  const { t, toggleLanguage, language } = useLanguage();
   const [sales, setSales] = useState<PNTSale[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [stats, setStats] = useState({ total: 0, active: 0, successful: 0, failed: 0, totalParticipants: 0 });
 
   const categories = [
-    { id: 'all', name: '全部', icon: '🌟' },
-    { id: 'food', name: '餐饮', icon: '🍽️' },
-    { id: 'fitness', name: '健身', icon: '💪' },
-    { id: 'beauty', name: '美容', icon: '💄' },
-    { id: 'retail', name: '零售', icon: '🛍️' },
-    { id: 'entertainment', name: '娱乐', icon: '🎮' }
+    { id: 'all', name: t('sales.all'), icon: '🌟' },
+    { id: 'food', name: t('sales.food'), icon: '🍽️' },
+    { id: 'fitness', name: t('sales.fitness'), icon: '💪' },
+    { id: 'beauty', name: t('sales.beauty'), icon: '💄' },
+    { id: 'retail', name: t('sales.retail'), icon: '🛍️' },
+    { id: 'entertainment', name: t('sales.entertainment'), icon: '🎮' }
   ];
 
   useEffect(() => {
-    // 模拟加载预售数据
-    const timer = setTimeout(() => {
-      setSales([
-        {
-          id: '1',
-          address: '0x1234...5678',
-          name: 'Alice咖啡积分',
-          issuer: 'alice.coffee.eth',
-          description: '精品咖啡店积分，可兑换饮品、享受折扣，支持多种咖啡豆和甜点选择。每消费100泰铢可获得10积分。',
-          status: 'Active',
-          pricePerPNT: '0.001',
-          totalSupply: '10000',
-          soldAmount: '7500',
-          targetAmount: '5000',
-          endTime: '2024-07-20',
-          participants: 156,
-          category: 'food'
-        },
-        {
-          id: '2',
-          address: '0x2345...6789',
-          name: 'Bob健身俱乐部积分',
-          issuer: 'bob.fitness.eth',
-          description: '现代化健身房积分，可兑换私教课程、团体课程、营养咨询和健身装备租赁服务。',
-          status: 'Active',
-          pricePerPNT: '0.002',
-          totalSupply: '5000',
-          soldAmount: '3200',
-          targetAmount: '2000',
-          endTime: '2024-07-25',
-          participants: 89,
-          category: 'fitness'
-        },
-        {
-          id: '3',
-          address: '0x3456...7890',
-          name: 'Charlie美食积分',
-          issuer: 'charlie.restaurant.eth',
-          description: '泰式料理餐厅积分，可享受招牌菜品折扣、免费开胃菜和节日特别套餐优惠。',
-          status: 'Successful',
-          pricePerPNT: '0.0015',
-          totalSupply: '8000',
-          soldAmount: '8000',
-          targetAmount: '4000',
-          endTime: '2024-07-15',
-          participants: 203,
-          category: 'food'
-        },
-        {
-          id: '4',
-          address: '0x4567...8901',
-          name: 'Diana美容SPA积分',
-          issuer: 'diana.beauty.eth',
-          description: '高端美容SPA积分，包含面部护理、身体护理、美甲美睫和专业化妆服务。',
-          status: 'Pending',
-          pricePerPNT: '0.003',
-          totalSupply: '3000',
-          soldAmount: '800',
-          targetAmount: '1500',
-          endTime: '2024-08-01',
-          participants: 34,
-          category: 'beauty'
-        },
-        {
-          id: '5',
-          address: '0x5678...9012',
-          name: 'Eve电子产品积分',
-          issuer: 'eve.electronics.eth',
-          description: '电子产品零售积分，可用于购买手机、电脑、游戏设备和智能家居产品。',
-          status: 'Failed',
-          pricePerPNT: '0.0025',
-          totalSupply: '12000',
-          soldAmount: '2400',
-          targetAmount: '6000',
-          endTime: '2024-07-10',
-          participants: 67,
-          category: 'retail'
-        },
-        {
-          id: '6',
-          address: '0x6789...0123',
-          name: 'Frank游戏中心积分',
-          issuer: 'frank.gaming.eth',
-          description: '游戏娱乐中心积分，可用于街机游戏、VR体验、桌游和电竞比赛报名。',
-          status: 'Active',
-          pricePerPNT: '0.0018',
-          totalSupply: '6000',
-          soldAmount: '4200',
-          targetAmount: '3000',
-          endTime: '2024-07-30',
-          participants: 128,
-          category: 'entertainment'
-        }
-      ]);
-      setLoading(false);
-    }, 800);
+    // 加载销售数据和统计信息
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        
+        // 并行加载销售数据和统计信息
+        const [salesResponse, statsData] = await Promise.all([
+          fetchSalesData(),
+          fetchSalesStats()
+        ]);
+        
+        setSales(salesResponse.data);
+        setStats(statsData);
+      } catch (error) {
+        console.error('Failed to load sales data:', error);
+        // 可以在这里添加错误提示
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    return () => clearTimeout(timer);
+    loadData();
   }, []);
 
   const filteredSales = selectedCategory === 'all' 
@@ -155,12 +67,12 @@ function SalesContent() {
 
   const getStatusText = (status: PNTSale['status']) => {
     switch (status) {
-      case 'Active': return '进行中';
-      case 'Pending': return '等待中';
-      case 'Successful': return '成功';
-      case 'Failed': return '失败';
-      case 'Closed': return '已关闭';
-      default: return '未知';
+      case 'Active': return t('status.active');
+      case 'Pending': return t('status.pending');
+      case 'Successful': return t('status.successful');
+      case 'Failed': return t('status.failed');
+      case 'Closed': return t('status.closed');
+      default: return t('status.unknown');
     }
   };
 
@@ -172,16 +84,29 @@ function SalesContent() {
 
   return (
     <div className="container mx-auto p-4">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-          PNTs 预售市场
-        </h1>
-        <p className="text-gray-600 mb-6">
-          发现优质积分卡预售，以极低价格获得商家忠诚度积分，享受折扣和特殊优惠
-        </p>
+      {/* Header with Language Switch */}
+      <div className="flex justify-between items-start mb-8">
+        <div className="flex-1">
+          <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            {t('sales.title')}
+          </h1>
+          <p className="text-gray-600 mb-6">
+            {t('sales.subtitle')}
+          </p>
+        </div>
+        
+        {/* Language Switch Button */}
+        <button
+          type="button"
+          onClick={toggleLanguage}
+          className="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors ml-4"
+        >
+          {t('switch.language')}
+        </button>
+      </div>
 
-        {/* User Status */}
+      {/* User Status */}
+      <div>
         {user ? (
           <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
             <div className="flex items-center justify-between">
@@ -239,24 +164,20 @@ function SalesContent() {
           {/* Statistics */}
           <div className="grid md:grid-cols-4 gap-6 mb-8">
             <div className="bg-white rounded-lg shadow-md p-6 text-center">
-              <div className="text-3xl font-bold text-blue-600 mb-2">{sales.length}</div>
-              <div className="text-gray-600">总预售项目</div>
+              <div className="text-3xl font-bold text-blue-600 mb-2">{stats.total}</div>
+              <div className="text-gray-600">{t('sales.active_presales')}</div>
             </div>
             <div className="bg-white rounded-lg shadow-md p-6 text-center">
-              <div className="text-3xl font-bold text-green-600 mb-2">
-                {sales.filter(s => s.status === 'Active').length}
-              </div>
-              <div className="text-gray-600">进行中</div>
+              <div className="text-3xl font-bold text-green-600 mb-2">{stats.active}</div>
+              <div className="text-gray-600">{t('status.active')}</div>
             </div>
             <div className="bg-white rounded-lg shadow-md p-6 text-center">
-              <div className="text-3xl font-bold text-purple-600 mb-2">
-                {sales.reduce((sum, sale) => sum + sale.participants, 0)}
-              </div>
-              <div className="text-gray-600">总参与者</div>
+              <div className="text-3xl font-bold text-purple-600 mb-2">{stats.totalParticipants}</div>
+              <div className="text-gray-600">{t('sales.total_participants')}</div>
             </div>
             <div className="bg-white rounded-lg shadow-md p-6 text-center">
               <div className="text-3xl font-bold text-orange-600 mb-2">1.5%</div>
-              <div className="text-gray-600">平台手续费</div>
+              <div className="text-gray-600">{t('sales.platform_fee')}</div>
             </div>
           </div>
 
@@ -284,7 +205,7 @@ function SalesContent() {
                         {categories.find(c => c.id === sale.category)?.icon || '⭐'}
                       </span>
                       <div>
-                        <h3 className="font-bold text-gray-800">{sale.name}</h3>
+                        <h3 className="font-bold text-gray-800">{sale.name[language]}</h3>
                         <p className="text-sm text-gray-500">{sale.issuer}</p>
                       </div>
                     </div>
@@ -294,7 +215,7 @@ function SalesContent() {
                   </div>
 
                   {/* Description */}
-                  <p className="text-gray-600 text-sm mb-4 line-clamp-3">{sale.description}</p>
+                  <p className="text-gray-600 text-sm mb-4 line-clamp-3">{sale.description[language]}</p>
 
                   {/* Progress */}
                   <div className="mb-4">

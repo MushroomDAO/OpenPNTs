@@ -515,7 +515,7 @@
   position in Google map,(could you add link to her business page in map); 
   how many squares is her coffee shop? the shop face picture and 3 photos of 
   business photos(like counters with breads, coffee and croissants and more 
-  customers photos）, to show her sincerity to buyers: I'm running a real 
+  customers photos), to show her sincerity to buyers: I'm running a real 
   business, I sell pnts to promote my business and act as a crypto friendly 
   shop. and we should have a evaluation model to get a number for her hard 
   cap, for now we can use a simple function). so alice get some usdc with 
@@ -787,3 +787,33 @@
 
 
 
+----
+## 补充思考
+我重新思考了平台的逻辑，请你给出分析和反馈，分析和反馈纳入新版本 0.6 并记录：
+小商家不用发行积分了，只有一种积分：平台基础单位是 PNTs。
+PNTs 可以极低的价格获取，大约是面值的 5-10%，例如 20 积分对应了 20THB（泰铢）的优惠，价格大约是 2THB 到 1THB。
+销售积分的收入归商家，有一点平台手续费（1.5% 左右）
+对于商家来说，平台就是发行量化透明的预充值卡（客户忠诚度卡，积分卡），购买链上积分卡后，自动充值 PNTs 到用户账户，账户用来记录客户拥有的积分和 coupon。
+积分 PNTs 可以购买 coupon（更多折扣），直接抵扣支付（需要商家设置规则），直接兑换 swag（赠品或者礼品或者其他）。积分购物功能先不开发，但首页可以列出来一些 coupon 卡，例如 3 杯送一杯 coupon，满 300 减 30coupon 等。
+
+coupon 分为面值折扣、兑换（100 积分换一杯 latee），赠送等模式，coupon 发行不在本平台。
+原来合约是 EIP-1155 发行积分卡，应该不用改，每个有不同面值即可。
+
+用户获得积分有两种方式：购买或者参与活动：例如转发 twitter，参与游戏。
+
+一个简单的逻辑：100 thb 的咖啡是市场价，也可以 80thb+20 积分来购买，使用专用 app 扫描，app 后台会扣取支付账户的 thb 积分来支付，没有 thb 的，扣取 account 中的加密资产支付（这个是 account 的逻辑）。
+20 积分购买成本是 10% 的价格，2thb，或者转发一个 twitter（获得 50 积分）。用户也可以低价购买 coupon，每个 coupon 对应了例如
+
+---------
+
+todo：
+airaccount 集成
+积分卡发行和充值到 airaccount
+支付购买 coupon
+app 支付商家订单：需要对接银行 api 支付 thb
+coupon 发行，积分结算，coupon 计算后台
+加密资产，目前先 usdt，api 获得 thb 到集中账户
+积分独立运行逻辑测试：积分默认是面值的 5-10%，商家自主定价销售积分
+对于任务需要商家设立奖励积分，和游戏中掉落 coupon，同样是商家设置奖励；
+这些奖励，只有客户到店消费才兑现，其他时间只是链上积分，商家只支付了面值 1.5% 的发行费用，发行 100 积分，面值 100thb，支付 1.5thb，只有当客户消费 100 积分时才支付。
+对于

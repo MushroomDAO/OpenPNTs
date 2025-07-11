@@ -178,18 +178,18 @@ function HomeContent() {
         {/* 平台价值主张 */}
         <div className="bg-gradient-to-r from-blue-100 to-purple-100 rounded-2xl shadow-lg p-8 mb-16">
           <div className="text-center">
-            <h2 className="text-3xl font-bold mb-6 text-gray-800">核心竞争力</h2>
+            <h2 className="text-3xl font-bold mb-6 text-gray-800">{t('core.title')}</h2>
             <div className="grid md:grid-cols-2 gap-8">
               <div>
-                <h3 className="text-xl font-semibold mb-4 text-blue-700">Play2B2E + CPS + Crypto</h3>
+                <h3 className="text-xl font-semibold mb-4 text-blue-700">{t('core.innovation')}</h3>
                 <p className="text-gray-700">
-                  游戏化获取积分 + 按效果付费 + 加密货币支付，三重创新模式重新定义商业忠诚度体系。
+                  {t('core.innovation.desc')}
                 </p>
               </div>
               <div>
-                <h3 className="text-xl font-semibold mb-4 text-purple-700">智能合约 + 去中心化计算 + AI优化</h3>
+                <h3 className="text-xl font-semibold mb-4 text-purple-700">{t('core.tech')}</h3>
                 <p className="text-gray-700">
-                  区块链技术保证透明度，AI算法优化推荐，去中心化计算确保平台去中心化运营。
+                  {t('core.tech.desc')}
                 </p>
               </div>
             </div>
@@ -198,37 +198,35 @@ function HomeContent() {
 
         {/* 使用示例 */}
         <div className="bg-white rounded-2xl shadow-lg p-8 mb-16">
-          <h2 className="text-3xl font-bold mb-8 text-center text-gray-800">使用场景</h2>
+          <h2 className="text-3xl font-bold mb-8 text-center text-gray-800">{t('usecases.title')}</h2>
           <div className="grid md:grid-cols-2 gap-8">
             <div className="space-y-4">
-              <h3 className="text-xl font-semibold text-green-700">💰 购买积分卡</h3>
+              <h3 className="text-xl font-semibold text-green-700">{t('usecases.buy.title')}</h3>
               <p className="text-gray-600 mb-4">
-                商家Alice发行咖啡积分，100 THB市场价的咖啡可以用80 THB + 20积分购买。
-                20积分的购买成本仅需2 THB（10%），为用户节省巨大成本。
+                {t('usecases.buy.desc')}
               </p>
               
-              <h3 className="text-xl font-semibold text-blue-700">🎯 获得积分</h3>
+              <h3 className="text-xl font-semibold text-blue-700">{t('usecases.earn.title')}</h3>
               <ul className="text-gray-600 space-y-2">
-                <li>• 低价购买：2 THB = 20积分</li>
-                <li>• 转发Twitter：免费获得50积分</li>
-                <li>• 参与游戏：娱乐中赚取积分</li>
-                <li>• 完成任务：多种活动获得奖励</li>
+                <li>{t('usecases.earn.item1')}</li>
+                <li>{t('usecases.earn.item2')}</li>
+                <li>{t('usecases.earn.item3')}</li>
+                <li>{t('usecases.earn.item4')}</li>
               </ul>
             </div>
             
             <div className="space-y-4">
-              <h3 className="text-xl font-semibold text-purple-700">🏪 商家收益</h3>
+              <h3 className="text-xl font-semibold text-purple-700">{t('usecases.merchant.title')}</h3>
               <p className="text-gray-600 mb-4">
-                平台仅收取1.5%手续费，销售积分的收入全部归商家。相比传统平台30-60%的佣金，
-                获客成本降低20-40倍。
+                {t('usecases.merchant.desc')}
               </p>
               
-              <h3 className="text-xl font-semibold text-orange-700">🎁 Coupon系统</h3>
+              <h3 className="text-xl font-semibold text-orange-700">{t('usecases.coupon.title')}</h3>
               <ul className="text-gray-600 space-y-2">
-                <li>• 面值折扣：满300减30 coupon</li>
-                <li>• 兑换模式：100积分换一杯拿铁</li>
-                <li>• 赠送活动：买3杯送1杯 coupon</li>
-                <li>• 直接支付：积分抵扣现金</li>
+                <li>{t('usecases.coupon.item1')}</li>
+                <li>{t('usecases.coupon.item2')}</li>
+                <li>{t('usecases.coupon.item3')}</li>
+                <li>{t('usecases.coupon.item4')}</li>
               </ul>
             </div>
           </div>
@@ -236,19 +234,19 @@ function HomeContent() {
 
         {/* Demo Section */}
         <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-2xl shadow-lg p-8 text-center">
-          <h3 className="text-2xl font-bold mb-4 text-gray-800">体验演示</h3>
+          <h3 className="text-2xl font-bold mb-4 text-gray-800">{t('demo.title')}</h3>
           <p className="text-gray-600 mb-6">
-            无需钱包连接，使用本地测试数据快速体验Alice咖啡店和Bob客户的完整交互流程
+            {t('demo.desc')}
           </p>
           
           <Link href="/demo">
             <button type="button" className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-8 py-4 rounded-xl font-semibold hover:shadow-lg transition-all duration-300 transform hover:scale-105">
-              立即体验 Demo
+              {t('demo.button')}
             </button>
           </Link>
           
           <div className="mt-4 text-sm text-gray-500">
-            <p>🔧 本地 Anvil 网络 | 🚫 无需 MetaMask</p>
+            <p>{t('demo.note')}</p>
           </div>
         </div>
       </main>
@@ -256,7 +254,7 @@ function HomeContent() {
       {/* Footer */}
       <footer className="bg-gray-50 py-8 px-6">
         <div className="container mx-auto text-center text-gray-600">
-          <p>&copy; 2024 OpenPNTs Platform. 全球统一积分系统 - 让忠诚度更有价值</p>
+          <p>&copy; 2024 OpenPNTs Platform. {t('footer.copyright')}</p>
         </div>
       </footer>
     </div>

@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { useAirAccount } from '../../providers';
 import { formatPNTs } from '../../../lib/airaccount';
+import { generateMockTxHash } from '../../../lib/blockchain';
+import { TransactionCard, NetworkIndicator, AddressLink } from '../../components/BlockchainLinks';
 import ClientOnly from '../../components/ClientOnly';
 
 interface SalePageParams {
@@ -45,6 +47,7 @@ function SaleContent() {
   const [purchaseAmount, setPurchaseAmount] = useState('');
   const [purchasing, setPurchasing] = useState(false);
   const [purchased, setPurchased] = useState(false);
+  const [purchaseTxHash, setPurchaseTxHash] = useState<string>('');
 
   useEffect(() => {
     // 模拟根据地址加载预售详情
@@ -136,8 +139,10 @@ function SaleContent() {
       // 模拟购买流程
       await new Promise(resolve => setTimeout(resolve, 2000));
       
+      // 生成模拟交易哈希
+      const txHash = generateMockTxHash();
+      setPurchaseTxHash(txHash);
       setPurchased(true);
-      alert(`成功购买 ${purchaseAmount} PNTs！`);
     } catch (error) {
       console.error('Purchase failed:', error);
       alert('购买失败，请重试');
@@ -206,9 +211,15 @@ function SaleContent() {
         <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-4xl font-bold mb-2">{sale.name}</h1>
+              <div className="flex items-center space-x-4 mb-2">
+                <h1 className="text-4xl font-bold">{sale.name}</h1>
+                <NetworkIndicator />
+              </div>
               <p className="text-gray-600">发行方: {sale.issuer}</p>
-              <p className="text-sm text-gray-500">合约地址: {sale.address}</p>
+              <div className="flex items-center space-x-2">
+                <span className="text-sm text-gray-500">合约地址:</span>
+                <AddressLink address={sale.address} />
+              </div>
             </div>
             <span className={`px-4 py-2 rounded-full text-sm font-medium ${getStatusColor(sale.status)}`}>
               {getStatusText(sale.status)}
@@ -324,6 +335,20 @@ function SaleContent() {
                   {purchasing && (
                     <div className="text-center text-sm text-gray-600">
                       <p>🔒 请完成指纹验证</p>
+                    </div>
+                  )}
+
+                  {purchased && purchaseTxHash && (
+                    <div className="mt-4">
+                      <TransactionCard
+                        title="购买成功！"
+                        description={`成功购买 ${purchaseAmount} PNTs 积分`}
+                        txHash={purchaseTxHash}
+                        status="confirmed"
+                        amount={`${purchaseAmount} PNTs`}
+                        timestamp={Math.floor(Date.now() / 1000)}
+                        className="bg-green-50 border-green-200"
+                      />
                     </div>
                   )}
                 </div>

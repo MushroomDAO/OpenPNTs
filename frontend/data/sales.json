@@ -1,0 +1,137 @@
+{
+  "sales": [
+    {
+      "id": "sale_001",
+      "address": "0x1234567890abcdef1234567890abcdef12345678",
+      "name": {
+        "zh": "Alice咖啡积分",
+        "en": "Alice Coffee Points"
+      },
+      "issuer": "alice.coffee.eth",
+      "description": {
+        "zh": "精品咖啡店积分，可兑换饮品、享受折扣，支持多种咖啡豆和甜点选择。每消费100泰铢可获得10积分。",
+        "en": "Premium coffee shop points, redeemable for beverages and discounts, supporting various coffee beans and dessert options. Earn 10 points for every 100 THB spent."
+      },
+      "status": "Active",
+      "pricePerPNT": "0.001",
+      "totalSupply": "10000",
+      "soldAmount": "7500",
+      "targetAmount": "5000",
+      "endTime": "2024-07-20",
+      "participants": 156,
+      "category": "food"
+    },
+    {
+      "id": "sale_002",
+      "address": "0x2345678901bcdef12345678901bcdef123456789",
+      "name": {
+        "zh": "Bob健身俱乐部积分",
+        "en": "Bob Fitness Club Points"
+      },
+      "issuer": "bob.fitness.eth",
+      "description": {
+        "zh": "现代化健身房积分，可兑换私教课程、团体课程、营养咨询和健身装备租赁服务。",
+        "en": "Modern gym points, redeemable for personal training, group classes, nutrition consultation, and fitness equipment rental services."
+      },
+      "status": "Active",
+      "pricePerPNT": "0.002",
+      "totalSupply": "5000",
+      "soldAmount": "3200",
+      "targetAmount": "2000",
+      "endTime": "2024-07-25",
+      "participants": 89,
+      "category": "fitness"
+    },
+    {
+      "id": "sale_003",
+      "address": "0x3456789012cdef123456789012cdef1234567890",
+      "name": {
+        "zh": "Charlie美食积分",
+        "en": "Charlie Restaurant Points"
+      },
+      "issuer": "charlie.restaurant.eth",
+      "description": {
+        "zh": "泰式料理餐厅积分，可享受招牌菜品折扣、免费开胃菜和节日特别套餐优惠。",
+        "en": "Thai cuisine restaurant points, enjoy signature dish discounts, free appetizers, and special holiday meal deals."
+      },
+      "status": "Successful",
+      "pricePerPNT": "0.0015",
+      "totalSupply": "8000",
+      "soldAmount": "8000",
+      "targetAmount": "4000",
+      "endTime": "2024-07-15",
+      "participants": 203,
+      "category": "food"
+    },
+    {
+      "id": "sale_004",
+      "address": "0x456789013def123456789013def12345678901a",
+      "name": {
+        "zh": "Diana美容SPA积分",
+        "en": "Diana Beauty SPA Points"
+      },
+      "issuer": "diana.beauty.eth",
+      "description": {
+        "zh": "高端美容SPA积分，包含面部护理、身体护理、美甲美睫和专业化妆服务。",
+        "en": "Premium beauty SPA points, including facial care, body care, nail and eyelash services, and professional makeup services."
+      },
+      "status": "Pending",
+      "pricePerPNT": "0.003",
+      "totalSupply": "3000",
+      "soldAmount": "800",
+      "targetAmount": "1500",
+      "endTime": "2024-08-01",
+      "participants": 34,
+      "category": "beauty"
+    },
+    {
+      "id": "sale_005",
+      "address": "0x56789014ef123456789014ef123456789012b",
+      "name": {
+        "zh": "Eve电子产品积分",
+        "en": "Eve Electronics Points"
+      },
+      "issuer": "eve.electronics.eth",
+      "description": {
+        "zh": "电子产品零售积分，可用于购买手机、电脑、游戏设备和智能家居产品。",
+        "en": "Electronics retail points, usable for purchasing smartphones, computers, gaming devices, and smart home products."
+      },
+      "status": "Failed",
+      "pricePerPNT": "0.0025",
+      "totalSupply": "12000",
+      "soldAmount": "2400",
+      "targetAmount": "6000",
+      "endTime": "2024-07-10",
+      "participants": 67,
+      "category": "retail"
+    },
+    {
+      "id": "sale_006",
+      "address": "0x6789015f123456789015f123456789013c",
+      "name": {
+        "zh": "Frank游戏中心积分",
+        "en": "Frank Gaming Center Points"
+      },
+      "issuer": "frank.gaming.eth",
+      "description": {
+        "zh": "游戏娱乐中心积分，可用于街机游戏、VR体验、桌游和电竞比赛报名。",
+        "en": "Gaming entertainment center points, usable for arcade games, VR experiences, board games, and esports tournament registration."
+      },
+      "status": "Active",
+      "pricePerPNT": "0.0018",
+      "totalSupply": "6000",
+      "soldAmount": "4200",
+      "targetAmount": "3000",
+      "endTime": "2024-07-30",
+      "participants": 128,
+      "category": "entertainment"
+    }
+  ],
+  "metadata": {
+    "version": "1.0.0",
+    "lastUpdated": "2024-07-11T12:00:00Z",
+    "totalProjects": 6,
+    "activeProjects": 3,
+    "categories": ["food", "fitness", "beauty", "retail", "entertainment"]
+  }
+} 
