@@ -61,8 +61,14 @@ contract SaleTest is Test {
         // 1. Create Sale
         vm.prank(owner);
         address saleAddress = factory.createSale(
-            pntTokenId, address(currency), price, maxPoints, minPoints,
-            block.timestamp + 100, block.timestamp + 200, payable(alice)
+            pntTokenId,
+            address(currency),
+            price,
+            maxPoints,
+            minPoints,
+            block.timestamp + 100,
+            block.timestamp + 200,
+            payable(alice)
         );
         Sale sale = Sale(saleAddress);
 
@@ -80,7 +86,7 @@ contract SaleTest is Test {
         // 3. Finalize Sale
         vm.warp(block.timestamp + 201); // Move time to after sale end
         sale.finalize();
-        assertEq(uint(sale.saleState()), uint(Sale.State.Successful));
+        assertEq(uint256(sale.saleState()), uint256(Sale.State.Successful));
 
         // 4. Beneficiary (Alice) provides PNTs to the sale contract for claiming
         vm.startPrank(alice);
@@ -104,8 +110,14 @@ contract SaleTest is Test {
         // 1. Create Sale
         vm.prank(owner);
         address saleAddress = factory.createSale(
-            pntTokenId, address(currency), price, maxPoints, minPoints,
-            block.timestamp + 100, block.timestamp + 200, payable(alice)
+            pntTokenId,
+            address(currency),
+            price,
+            maxPoints,
+            minPoints,
+            block.timestamp + 100,
+            block.timestamp + 200,
+            payable(alice)
         );
         Sale sale = Sale(saleAddress);
 
@@ -121,7 +133,7 @@ contract SaleTest is Test {
         // 3. Finalize Sale
         vm.warp(block.timestamp + 201);
         sale.finalize();
-        assertEq(uint(sale.saleState()), uint(Sale.State.Failed));
+        assertEq(uint256(sale.saleState()), uint256(Sale.State.Failed));
 
         // 4. Customer (Bob) gets a refund
         uint256 initialBobBalance = currency.balanceOf(bob);

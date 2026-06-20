@@ -12,11 +12,7 @@ contract SaleFactory is Ownable {
     address public immutable PNT_CONTRACT;
     address[] public deployedSales;
 
-    event SaleCreated(
-        address indexed saleAddress,
-        address indexed beneficiary,
-        uint256 indexed tokenId
-    );
+    event SaleCreated(address indexed saleAddress, address indexed beneficiary, uint256 indexed tokenId);
 
     constructor(address _pntContract, address initialOwner) Ownable(initialOwner) {
         PNT_CONTRACT = _pntContract;
@@ -45,15 +41,7 @@ contract SaleFactory is Ownable {
         address payable _beneficiary
     ) external onlyOwner returns (address) {
         Sale newSale = new Sale(
-            PNT_CONTRACT,
-            _tokenId,
-            _currency,
-            _price,
-            _maxPoints,
-            _minPoints,
-            _startTime,
-            _endTime,
-            _beneficiary
+            PNT_CONTRACT, _tokenId, _currency, _price, _maxPoints, _minPoints, _startTime, _endTime, _beneficiary
         );
 
         address saleAddress = address(newSale);

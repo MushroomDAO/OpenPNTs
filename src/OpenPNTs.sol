@@ -20,10 +20,7 @@ contract OpenPNTs is ERC1155, Ownable {
      * The base URI can be a gateway like https://api.openpnts.com/meta/{id}.json
      * The {id} placeholder is replaced by the actual token ID in lowercase hex.
      */
-    constructor(
-        string memory baseURI,
-        address initialOwner
-    ) ERC1155(baseURI) Ownable(initialOwner) {}
+    constructor(string memory baseURI, address initialOwner) ERC1155(baseURI) Ownable(initialOwner) {}
 
     /**
      * @dev Creates a new type of loyalty point for a business.
@@ -32,10 +29,7 @@ contract OpenPNTs is ERC1155, Ownable {
      * @param initialSupply The number of points to mint for the business owner.
      * @return tokenId The ID of the newly created loyalty point type.
      */
-    function create(
-        address creator,
-        uint256 initialSupply
-    ) public onlyOwner returns (uint256) {
+    function create(address creator, uint256 initialSupply) public onlyOwner returns (uint256) {
         uint256 tokenId = nextTokenId;
         nextTokenId++;
 
@@ -51,9 +45,7 @@ contract OpenPNTs is ERC1155, Ownable {
     /**
      * @dev Overrides the default URI function to support the {id} placeholder.
      */
-    function uri(
-        uint256 tokenId
-    ) public view override returns (string memory) {
+    function uri(uint256 tokenId) public view override returns (string memory) {
         return super.uri(tokenId);
     }
 

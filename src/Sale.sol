@@ -168,13 +168,10 @@ contract Sale {
 
     // --- ERC1155 Receiver Hooks ---
 
-    function onERC1155Received(
-        address operator,
-        address from,
-        uint256 id,
-        uint256 value,
-        bytes calldata data
-    ) external returns (bytes4) {
+    function onERC1155Received(address operator, address from, uint256 id, uint256 value, bytes calldata data)
+        external
+        returns (bytes4)
+    {
         // This contract is designed to receive ERC1155 tokens (PNTs) from the beneficiary
         // for distribution to customers. It does not need to react to the transfer
         // in any special way, just acknowledge receipt.
